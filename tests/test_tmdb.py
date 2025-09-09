@@ -2,6 +2,7 @@ import tmdb_client
 import requests
 import pytest
 from unittest.mock import Mock
+from main import app
 
 # Sample data for mocking API responses
 mock_movie_details = {
@@ -108,3 +109,20 @@ def test_get_movie_images_success(monkeypatch):
     )
     # Sprawdzenie, czy zwrócono kompletny słownik z obrazami
     assert movie_images == mock_images_data
+
+
+@pytest.mark.parametrize("list_type", ['popular', 'top_rated', 'now_playing', 'upcoming'])
+def test_homepage(monkeypatch, list_type):
+    """
+    Testuje stronę główną dla różnych typów list filmów.
+    Sprawdza, czy aplikacja zwraca kod 200 i wywołuje odpowiednią funkcję
+    do pobierania listy filmów.
+    """
+    api_mock = Mock(return_value={'results':[mock_movie_details]*8})
+    monkeypatch.setattr("tmdb_client.get_movies_list", api_mock)
+
+    with app.test_client() as client:
+        response = client.get(f'/?list_type={list_type}')
+        assert response.status_code == 200
+
+        api_mock.assert_called_once_with(list_type)
