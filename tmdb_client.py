@@ -25,6 +25,7 @@ def get_single_movie(movie_id):
         "Authorization": f"Bearer {API_TOKEN}"
     }
     response = requests.get(endpoint, headers=headers)
+    response.raise_for_status()
     return response.json()
 
 def get_single_movie_cast(movie_id):
